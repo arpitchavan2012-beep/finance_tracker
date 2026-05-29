@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker - Manage Your Money</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <h1 class="app-title">💰 Finance Tracker</h1>
+            </div>
+            <div class="nav-right">
+                <button id="themeToggle" class="theme-btn" title="Toggle dark mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <button id="exportBtn" class="btn-icon" title="Export data as JSON">
+                    📥
+                </button>
+                <button id="clearAllBtn" class="btn-icon danger" title="Clear all data">
+                    🗑️
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="nav-menu">
+                <button class="nav-btn active" data-section="dashboard">
+                    📊 Dashboard
+                </button>
+                <button class="nav-btn" data-section="transactions">
+                    💳 Transactions
+                </button>
+                <button class="nav-btn" data-section="goals">
+                    🎯 Savings Goals
+                </button>
+                <button class="nav-btn" data-section="analytics">
+                    📈 Analytics
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="section active">
+                <h2 class="section-title">Dashboard</h2>
+
+                <!-- Summary Cards -->
+                <div class="summary-grid">
+                    <div class="summary-card balance-card">
+                        <div class="card-header">
+                            <span class="card-title">Current Balance</span>
+                            <span class="card-icon">💵</span>
+                        </div>
+                        <div class="card-value" id="totalBalance">$0.00</div>
+                        <div class="card-change" id="balanceChange"></div>
+                    </div>
+
+                    <div class="summary-card income-card">
+                        <div class="card-header">
+                            <span class="card-title">Total Income</span>
+                            <span class="card-icon">💹</span>
+                        </div>
+                        <div class="card-value income" id="totalIncome">$0.00</div>
+                        <div class="card-subtitle" id="incomeCount">0 transactions</div>
+                    </div>
+
+                    <div class="summary-card expense-card">
+                        <div class="card-header">
+                            <span class="card-title">Total Expenses</span>
+                            <span class="card-icon">💸</span>
+                        </div>
+                        <div class="card-value expense" id="totalExpenses">$0.00</div>
+                        <div class="card-subtitle" id="expenseCount">0 transactions</div>
+                    </div>
+
+                    <div class="summary-card savings-card">
+                        <div class="card-header">
+                            <span class="card-title">Savings Rate</span>
+                            <span class="card-icon">📈</span>
+                        </div>
+                        <div class="card-value" id="savingsRate">0%</div>
+                        <div class="card-subtitle">of income</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="actions-grid">
+                        <button class="action-btn" id="quickAddIncome">
+                            <span class="action-icon">➕</span>
+                            <span>Add Income</span>
+                        </button>
+                        <button class="action-btn" id="quickAddExpense">
+                            <span class="action-icon">➖</span>
+                            <span>Add Expense</span>
+                        </button>
+                        <button class="action-btn" id="quickAddGoal">
+                            <span class="action-icon">🎯</span>
+                            <span>New Goal</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Monthly Summary -->
+                <div class="monthly-summary">
+                    <h3>Monthly Summary</h3>
+                    <div class="summary-content">
+                        <div class="summary-item">
+                            <label>Month:</label>
+                            <select id="monthSelect">
+                                <!-- Populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="summary-stats">
+                            <div class="stat-box">
+                                <span class="stat-label">Income</span>
+                                <span class="stat-value income" id="monthlyIncome">$0.00</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-label">Expenses</span>
+                                <span class="stat-value expense" id="monthlyExpenses">$0.00</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-label">Net</span>
+                                <span class="stat-value" id="monthlyNet">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="recent-transactions">
+                    <h3>Recent Transactions</h3>
+                    <div id="recentTransactionsList" class="transaction-list">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="transactions-section" class="section">
+                <h2 class="section-title">Transactions</h2>
+
+                <!-- Add Transaction Form -->
+                <div class="card form-card">
+                    <h3>Add New Transaction</h3>
+                    <form id="transactionForm" class="form-grid">
+                        <div class="form-group">
+                            <label for="transactionType">Transaction Type</label>
+                            <select id="transactionType" required>
+                                <option value="">Select type...</option>
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="">Select category...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Amount ($)</label>
+                            <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="description">Description/Note</label>
+                            <input type="text" id="description" placeholder="Enter transaction details...">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary full">
+                            Add Transaction
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Transaction Filter -->
+                <div class="card filter-card">
+                    <h3>Filter Transactions</h3>
+                    <div class="filter-controls">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search transactions..." 
+                            class="search-input"
+                        >
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="income">Income</button>
+                            <button class="filter-btn" data-filter="expense">Expense</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transactions List -->
+                <div class="transactions-container">
+                    <h3>All Transactions</h3>
+                    <div id="transactionsList" class="transaction-list">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Savings Goals Section -->
+            <section id="goals-section" class="section">
+                <h2 class="section-title">Savings Goals</h2>
+
+                <!-- Add Goal Form -->
+                <div class="card form-card">
+                    <h3>Create New Savings Goal</h3>
+                    <form id="goalForm" class="form-grid">
+                        <div class="form-group">
+                            <label for="goalName">Goal Name</label>
+                            <input 
+                                type="text" 
+                                id="goalName" 
+                                placeholder="e.g., Vacation, Car, House" 
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="targetAmount">Target Amount ($)</label>
+                            <input 
+                                type="number" 
+                                id="targetAmount" 
+                                placeholder="0.00" 
+                                step="0.01" 
+                                min="0" 
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="goalCategory">Category (Optional)</label>
+                            <input 
+                                type="text" 
+                                id="goalCategory" 
+                                placeholder="e.g., Travel, Vehicle"
+                            >
+                        </div>
+
+                        <button type="submit" class="btn btn-primary full">
+                            Create Goal
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Goals List -->
+                <div class="goals-container">
+                    <h3>Your Goals</h3>
+                    <div id="goalsList" class="goals-grid">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics-section" class="section">
+                <h2 class="section-title">Analytics</h2>
+
+                <!-- Charts Container -->
+                <div class="charts-grid">
+                    <div class="card chart-card">
+                        <h3>Expense Breakdown by Category</h3>
+                        <canvas id="expensePieChart"></canvas>
+                    </div>
+
+                    <div class="card chart-card">
+                        <h3>Savings Goals Progress</h3>
+                        <canvas id="goalsProgressChart"></canvas>
+                    </div>
+
+                    <div class="card chart-card full">
+                        <h3>Income vs Expenses Over Time</h3>
+                        <canvas id="incomeExpenseChart"></canvas>
+                    </div>
+
+                    <div class="card stats-card full">
+                        <h3>Category Breakdown</h3>
+                        <div id="categoryBreakdown" class="category-breakdown">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content error-modal">
+            <span class="close">&times;</span>
+            <h3>Error</h3>
+            <p id="errorMessage"></p>
+            <button class="btn btn-primary" onclick="closeErrorModal()">OK</button>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <h3 id="confirmTitle">Confirm</h3>
+            <p id="confirmMessage"></p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="cancelConfirm()">Cancel</button>
+                <button class="btn btn-danger" id="confirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h3>Edit Transaction</h3>
+            <form id="editForm" class="form-grid">
+                <div class="form-group">
+                    <label for="editType">Transaction Type</label>
+                    <select id="editType" required disabled>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editCategory">Category</label>
+                    <select id="editCategory" required>
+                        <option value="">Select category...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editAmount">Amount ($)</label>
+                    <input 
+                        type="number" 
+                        id="editAmount" 
+                        placeholder="0.00" 
+                        step="0.01" 
+                        min="0" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="editDate">Date</label>
+                    <input type="date" id="editDate" required>
+                </div>
+
+                <div class="form-group full">
+                    <label for="editDescription">Description/Note</label>
+                    <input type="text" id="editDescription" placeholder="Enter transaction details...">
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
